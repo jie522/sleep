@@ -1,0 +1,858 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070b1f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="好眠432">
+<meta name="description" content="432Hz 睡前音樂,可設定定時關閉">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>好眠 432 · 睡前音樂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-0:#050816;
+  --bg-1:#0b1230;
+  --bg-2:#1a1546;
+  --ink:#eef0ff;
+  --ink-2:#b9bde0;
+  --ink-3:#7f84b3;
+  --glass:rgba(255,255,255,.06);
+  --glass-2:rgba(255,255,255,.10);
+  --line:rgba(255,255,255,.10);
+  --accent:#c9b8ff;
+  --accent-2:#8fd3ff;
+  --gold:#ffe3a3;
+  --t1:#c9b8ff; --t2:#8fd3ff;
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg-0);
+  background-image:
+    radial-gradient(120% 70% at 50% -10%, #2a2266 0%, transparent 60%),
+    radial-gradient(90% 60% at 100% 100%, #0e2a4a 0%, transparent 60%),
+    linear-gradient(180deg,var(--bg-1),var(--bg-0));
+  background-attachment:fixed;
+  color:var(--ink);
+  font-family:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+  font-weight:400;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  user-select:none;-webkit-user-select:none;
+}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.app{
+  position:relative;z-index:1;
+  max-width:480px;margin:0 auto;
+  padding:calc(14px + var(--safe-t)) 16px calc(28px + var(--safe-b));
+}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;
+  background:linear-gradient(140deg,#6d5bd0,#2c6aa8);box-shadow:0 4px 18px rgba(120,100,255,.35)}
+.brand h1{font-family:"Noto Serif TC",serif;font-size:19px;letter-spacing:.08em;margin:0;font-weight:700}
+.brand small{display:block;font-size:11px;color:var(--ink-3);letter-spacing:.12em;margin-top:1px}
+.icon-btn{width:42px;height:42px;border-radius:14px;border:1px solid var(--line);background:var(--glass);
+  color:var(--ink-2);display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.icon-btn:active{transform:scale(.94)}
+
+/* ---- hero orb ---- */
+.hero{position:relative;display:flex;flex-direction:column;align-items:center;margin-top:10px}
+.orb-wrap{position:relative;width:min(78vw,300px);aspect-ratio:1}
+#viz{position:absolute;inset:0;width:100%;height:100%}
+.orb{
+  position:absolute;inset:22%;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #fff8e6 0%, var(--t1) 28%, color-mix(in srgb,var(--t2) 70%,#000) 75%, #0b0f2a 100%);
+  box-shadow:0 0 60px color-mix(in srgb,var(--t1) 55%,transparent),0 0 140px color-mix(in srgb,var(--t2) 30%,transparent), inset -18px -22px 40px rgba(0,0,30,.45);
+  transition:background 1.2s ease, box-shadow 1.2s ease;
+  animation:breathe 10s ease-in-out infinite;
+  animation-play-state:paused;
+}
+.playing .orb{animation-play-state:running}
+@keyframes breathe{0%,100%{transform:scale(.94)}50%{transform:scale(1.03)}}
+.orb::after{content:"";position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 70% 72%, rgba(0,0,0,.18) 0 8%, transparent 9%),
+             radial-gradient(circle at 58% 40%, rgba(0,0,0,.10) 0 5%, transparent 6%),
+             radial-gradient(circle at 40% 64%, rgba(0,0,0,.08) 0 4%, transparent 5%);
+  mix-blend-mode:multiply}
+.hz-badge{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);
+  font-size:11px;letter-spacing:.2em;color:var(--gold);padding:4px 10px;border-radius:99px;
+  background:rgba(10,12,40,.55);border:1px solid rgba(255,227,163,.25);white-space:nowrap}
+.now{text-align:center;margin-top:6px;min-height:62px}
+.now h2{font-family:"Noto Serif TC",serif;font-weight:500;font-size:24px;margin:0;letter-spacing:.06em}
+.now p{margin:6px 0 0;color:var(--ink-3);font-size:13px;letter-spacing:.04em}
+
+/* ---- transport ---- */
+.transport{display:flex;align-items:center;justify-content:center;gap:28px;margin-top:14px}
+.skip{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--glass);
+  color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.skip:active{transform:scale(.92)}
+.play{position:relative;width:96px;height:96px;border:0;background:none;padding:0;cursor:pointer;color:#120f2e}
+.play .ring{position:absolute;inset:0;transform:rotate(-90deg)}
+.play .ring circle{fill:none;stroke-width:3}
+.play .ring .trk{stroke:rgba(255,255,255,.10)}
+.play .ring .prg{stroke:url(#ringGrad);stroke-linecap:round;transition:stroke-dashoffset .6s linear}
+.play .core{position:absolute;inset:10px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(150deg,#fff6df,var(--t1));box-shadow:0 8px 30px color-mix(in srgb,var(--t1) 45%,transparent);
+  transition:background 1.2s}
+.play:active .core{transform:scale(.95)}
+
+.vol{display:flex;align-items:center;gap:12px;margin:22px 4px 0;color:var(--ink-3)}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:28px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;
+  background:linear-gradient(90deg,var(--t1) 0 var(--p,50%),rgba(255,255,255,.12) var(--p,50%))}
+input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:rgba(255,255,255,.12)}
+input[type=range]::-moz-range-progress{height:4px;border-radius:4px;background:var(--t1)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;margin-top:-8px;
+  background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.4),0 0 0 4px color-mix(in srgb,var(--t1) 30%,transparent)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border:0;border-radius:50%;background:#fff}
+
+/* ---- cards ---- */
+.card{margin-top:20px;padding:18px 16px;border-radius:22px;background:var(--glass);border:1px solid var(--line);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.card-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.card-head h3{margin:0;font-size:15px;font-weight:500;letter-spacing:.08em;display:flex;align-items:center;gap:8px}
+.remain{font-variant-numeric:tabular-nums;font-size:26px;font-weight:300;letter-spacing:.04em;color:var(--ink)}
+.remain-sub{font-size:12px;color:var(--ink-3);text-align:right;margin-top:2px;min-height:16px}
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.chip{height:40px;border-radius:13px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink-2);
+  font:inherit;font-size:14px;cursor:pointer;transition:all .25s}
+.chip.on{background:linear-gradient(140deg,color-mix(in srgb,var(--t1) 85%,#fff),var(--t2));color:#120f2e;border-color:transparent;font-weight:500;
+  box-shadow:0 4px 16px color-mix(in srgb,var(--t1) 35%,transparent)}
+.custom{display:flex;align-items:center;gap:12px;margin-top:14px;color:var(--ink-3);font-size:13px}
+.custom output{min-width:62px;text-align:right;color:var(--ink-2);font-variant-numeric:tabular-nums}
+
+.list-title{display:flex;justify-content:space-between;align-items:baseline;margin:26px 4px 10px}
+.list-title h3{margin:0;font-size:15px;font-weight:500;letter-spacing:.08em}
+.list-title span{font-size:12px;color:var(--ink-3)}
+.tracks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.track{position:relative;text-align:left;padding:14px 12px 13px;border-radius:20px;border:1px solid var(--line);
+  background:rgba(255,255,255,.04);color:var(--ink);font:inherit;cursor:pointer;overflow:hidden;min-height:118px;
+  transition:transform .2s, border-color .3s, background .3s}
+.track:active{transform:scale(.97)}
+.track::before{content:"";position:absolute;inset:auto -30% -55% auto;width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,var(--c1),transparent 70%);opacity:.28;transition:opacity .3s}
+.track.on{border-color:color-mix(in srgb,var(--c1) 60%,transparent);background:rgba(255,255,255,.08)}
+.track.on::before{opacity:.6}
+.t-ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(140deg,var(--c1),var(--c2));box-shadow:0 4px 14px color-mix(in srgb,var(--c1) 40%,transparent)}
+.t-name{display:block;margin-top:10px;font-size:15px;font-weight:500;letter-spacing:.04em}
+.t-desc{display:block;margin-top:3px;font-size:11.5px;color:var(--ink-3);line-height:1.45}
+.eq{position:absolute;top:16px;right:14px;display:none;gap:2px;align-items:flex-end;height:14px}
+.track.on .eq{display:flex}
+.eq i{width:3px;background:var(--c1);border-radius:2px;height:4px}
+.playing .track.on .eq i{animation:eq 1.2s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:-.4s!important}.eq i:nth-child(3){animation-delay:-.8s!important}
+@keyframes eq{0%,100%{height:3px}50%{height:14px}}
+
+.tip{margin:22px 6px 0;font-size:12px;line-height:1.7;color:var(--ink-3);text-align:center}
+.tip b{color:var(--ink-2);font-weight:500}
+
+/* ---- night (dim) mode ---- */
+#night{position:fixed;inset:0;z-index:20;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;
+  color:#5a5470;cursor:pointer;opacity:0;transition:opacity .8s}
+#night.show{display:flex}
+#night.vis{opacity:1}
+#night .clock{font-size:72px;font-weight:300;letter-spacing:.05em;font-variant-numeric:tabular-nums;color:#4a4560}
+#night .nrem{margin-top:8px;font-size:15px;letter-spacing:.1em}
+#night .nhint{position:absolute;bottom:calc(30px + var(--safe-b));font-size:12px;color:#2f2b3f;letter-spacing:.2em}
+
+.toast{position:fixed;left:50%;bottom:calc(26px + var(--safe-b));transform:translate(-50%,20px);z-index:30;
+  padding:11px 18px;border-radius:99px;background:rgba(20,22,60,.9);border:1px solid var(--line);font-size:14px;
+  opacity:0;pointer-events:none;transition:all .4s;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:360px){.chips{grid-template-columns:repeat(4,1fr);gap:6px}.chip{font-size:13px}.transport{gap:20px}}
+@media (prefers-reduced-motion:reduce){.orb{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+
+<div class="app" id="app">
+  <header>
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" fill="#fff6df"/></svg>
+      </div>
+      <div><h1>好眠 432</h1><small>A = 432 Hz 睡前音樂</small></div>
+    </div>
+    <button class="icon-btn" id="nightBtn" aria-label="夜燈模式(螢幕變暗)" title="夜燈模式">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2"/><circle cx="12" cy="12" r="4"/><path d="M4 20 20 4"/></svg>
+    </button>
+  </header>
+
+  <section class="hero">
+    <div class="orb-wrap">
+      <canvas id="viz"></canvas>
+      <div class="orb"></div>
+      <div class="hz-badge">432 Hz</div>
+    </div>
+    <div class="now">
+      <h2 id="nowName">純淨 432</h2>
+      <p id="nowDesc">輕觸播放,讓身心慢慢沉靜</p>
+    </div>
+    <div class="transport">
+      <button class="skip" id="prevBtn" aria-label="上一首">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9.5 12z"/></svg>
+      </button>
+      <button class="play" id="playBtn" aria-label="播放">
+        <svg class="ring" viewBox="0 0 100 100">
+          <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6df"/><stop offset="1" stop-color="#8fd3ff"/></linearGradient></defs>
+          <circle class="trk" cx="50" cy="50" r="47"/>
+          <circle class="prg" id="ringPrg" cx="50" cy="50" r="47" stroke-dasharray="295.3" stroke-dashoffset="0"/>
+        </svg>
+        <span class="core" id="playIco"></span>
+      </button>
+      <button class="skip" id="nextBtn" aria-label="下一首">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l10.5-7z"/></svg>
+      </button>
+    </div>
+    <div class="vol" style="width:100%">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M4 9h4l5-4v14l-5-4H4z"/></svg>
+      <input type="range" id="vol" min="0" max="100" value="60" aria-label="音量">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor" stroke="none"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>定時關閉</h3>
+      <div>
+        <div class="remain" id="remain">60:00</div>
+      </div>
+    </div>
+    <div class="remain-sub" id="remainSub">播放後開始倒數,結束前會慢慢淡出</div>
+    <div class="chips" id="chips"></div>
+    <div class="custom">
+      <span>自訂</span>
+      <input type="range" id="custom" min="5" max="180" step="5" value="60" aria-label="自訂分鐘">
+      <output id="customOut">60 分鐘</output>
+    </div>
+  </section>
+
+  <div class="list-title"><h3>音樂清單</h3><span>全部以 A=432Hz 調音・即時生成不重複</span></div>
+  <section class="tracks" id="tracks"></section>
+
+  <p class="tip">建議音量放低,手機可開啟<b>夜燈模式</b>讓螢幕全黑仍持續播放。<br>「雙耳節拍」請配戴耳機效果最佳。</p>
+</div>
+
+<div id="night" role="button" aria-label="輕觸返回">
+  <div class="clock" id="nClock">23:00</div>
+  <div class="nrem" id="nRem"></div>
+  <div class="nhint">輕 觸 返 回</div>
+</div>
+<div class="toast" id="toast"></div>
+<audio id="keepAlive" playsinline loop preload="auto"></audio>
+
+<script>
+(() => {
+'use strict';
+
+/* ================= Tuning (A4 = 432 Hz) ================= */
+const A4 = 432;
+const NOTE_OFS = {C:-9,D:-7,E:-5,F:-4,G:-2,A:0,B:2};
+function hz(n){
+  const m = /^([A-G])([#b]?)(\d)$/.exec(n);
+  const semi = NOTE_OFS[m[1]] + (m[2]==='#'?1:m[2]==='b'?-1:0) + (m[3]-4)*12;
+  return A4 * Math.pow(2, semi/12);
+}
+const rnd = (a,b)=>a+Math.random()*(b-a);
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+
+/* ================= Audio engine ================= */
+let ctx, master, timerGain, analyser, reverbIn, noiseBuf = {};
+
+function makeNoise(kind, seconds){
+  const sr = ctx.sampleRate, len = Math.floor(sr*seconds);
+  const buf = ctx.createBuffer(2, len, sr);
+  for (let ch=0; ch<2; ch++){
+    const d = buf.getChannelData(ch);
+    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0,last=0;
+    for (let i=0;i<len;i++){
+      const w = Math.random()*2-1;
+      if (kind==='pink'){
+        b0=.99886*b0+w*.0555179; b1=.99332*b1+w*.0750759; b2=.969*b2+w*.153852;
+        b3=.8665*b3+w*.3104856; b4=.55*b4+w*.5329522; b5=-.7616*b5-w*.016898;
+        d[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11; b6=w*.115926;
+      } else {
+        last=(last+.02*w)/1.02; d[i]=last*3.5;
+      }
+    }
+    // smooth loop seam
+    const fade = Math.floor(sr*.5);
+    for (let i=0;i<fade;i++){ const k=i/fade; d[i]=d[i]*k + d[len-fade+i]*(1-k); }
+  }
+  return buf;
+}
+function makeImpulse(sec, decay){
+  const sr=ctx.sampleRate, len=Math.floor(sr*sec), buf=ctx.createBuffer(2,len,sr);
+  for (let ch=0;ch<2;ch++){
+    const d=buf.getChannelData(ch);
+    for (let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);
+  }
+  return buf;
+}
+
+function initAudio(){
+  if (ctx) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  ctx = new AC({latencyHint:'playback'});
+  master = ctx.createGain(); master.gain.value = volToGain(state.vol);
+  timerGain = ctx.createGain();
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.value=-20; comp.knee.value=20; comp.ratio.value=3; comp.attack.value=.05; comp.release.value=.4;
+  analyser = ctx.createAnalyser(); analyser.fftSize = 512; analyser.smoothingTimeConstant = .86;
+  master.connect(timerGain); timerGain.connect(comp); comp.connect(analyser); analyser.connect(ctx.destination);
+
+  const conv = ctx.createConvolver(); conv.buffer = makeImpulse(5.5, 3.2);
+  reverbIn = ctx.createGain(); reverbIn.gain.value = .9;
+  const pre = ctx.createBiquadFilter(); pre.type='lowpass'; pre.frequency.value=5000;
+  reverbIn.connect(pre); pre.connect(conv); conv.connect(master);
+
+  noiseBuf.pink = makeNoise('pink', 9);
+  noiseBuf.brown = makeNoise('brown', 9);
+
+  ctx.addEventListener('statechange', () => {
+    if (state.playing && ctx.state !== 'running') ctx.resume().catch(()=>{});
+  });
+}
+
+/* ---- building blocks ---- */
+function gain(v, dest){ const g=ctx.createGain(); g.gain.value=v; if(dest) g.connect(dest); return g; }
+function drone(h, type, freq, vol, dest, detune=0){
+  const o=ctx.createOscillator(); o.type=type; o.frequency.value=freq; o.detune.value=detune;
+  const g=gain(vol, dest); o.connect(g); o.start(); h.nodes.push(o); return g;
+}
+function lfo(h, rate, depth, param){
+  const o=ctx.createOscillator(); o.frequency.value=rate;
+  const g=gain(depth); o.connect(g); g.connect(param); o.start(); h.nodes.push(o); return o;
+}
+function noise(h, kind, vol, dest){
+  const s=ctx.createBufferSource(); s.buffer=noiseBuf[kind]; s.loop=true;
+  const g=gain(vol, dest); s.connect(g); s.start(0, Math.random()*8); h.nodes.push(s); return g;
+}
+function filter(type, freq, q, dest){ const f=ctx.createBiquadFilter(); f.type=type; f.frequency.value=freq; if(q!=null) f.Q.value=q; if(dest) f.connect(dest); return f; }
+
+function bell(dest, freq, t, vel, dur){
+  const parts=[[1,1,1],[2,.22,.6],[3.01,.07,.4],[4.17,.03,.25]];
+  for (const [r,a,dk] of parts){
+    const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=freq*r;
+    const g=ctx.createGain(); g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(vel*a, t+.008);
+    g.gain.exponentialRampToValueAtTime(.0001, t+dur*dk);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t+dur*dk+.05);
+  }
+}
+function piano(dest, freq, t, vel){
+  const f=ctx.createBiquadFilter(); f.type='lowpass';
+  f.frequency.setValueAtTime(Math.min(4200, freq*8), t); f.frequency.exponentialRampToValueAtTime(Math.max(500,freq*1.5), t+2.5);
+  const g=ctx.createGain(); g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(vel, t+.006);
+  g.gain.exponentialRampToValueAtTime(vel*.35, t+.5);
+  g.gain.exponentialRampToValueAtTime(.0001, t+4.5);
+  f.connect(g); g.connect(dest);
+  for (const [type,mul,det,a] of [['triangle',1,0,1],['sine',2,3,.25],['sine',1,-4,.5]]){
+    const o=ctx.createOscillator(); o.type=type; o.frequency.value=freq*mul; o.detune.value=det;
+    const og=gain(a,f); o.connect(og); o.start(t); o.stop(t+4.6);
+  }
+}
+function pad(dest, freqs, t, dur, vol, cutoff=900){
+  const f=filter('lowpass', cutoff, .5, null);
+  const g=ctx.createGain(); g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(vol, t+dur*.35);
+  g.gain.setValueAtTime(vol, t+dur*.6);
+  g.gain.linearRampToValueAtTime(0, t+dur);
+  f.connect(g); g.connect(dest);
+  for (const fr of freqs) for (const det of [-7,7]){
+    const o=ctx.createOscillator(); o.type='sawtooth'; o.frequency.value=fr; o.detune.value=det+rnd(-2,2);
+    const og=gain(.5/freqs.length,f); o.connect(og); o.start(t); o.stop(t+dur+.05);
+  }
+}
+function bowl(dest, freq, t, vel){
+  const parts=[[1,1,16],[2.71,.42,10],[5.15,.18,6],[8.2,.07,3.5]];
+  for (const [r,a,dk] of parts){
+    for (const off of [-.45,.45]){
+      const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=freq*r+off*r;
+      const g=ctx.createGain(); g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(vel*a*.5, t+.03);
+      g.gain.exponentialRampToValueAtTime(.0001, t+dk);
+      o.connect(g); g.connect(dest); o.start(t); o.stop(t+dk+.05);
+    }
+  }
+}
+
+/* ================= Tracks ================= */
+const ICONS = {
+  wave:'<path d="M3 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0"/>',
+  star:'<path d="M12 3l2.2 5.6L20 9.3l-4.5 3.8 1.4 5.9L12 16l-4.9 3 1.4-5.9L4 9.3l5.8-.7z"/>',
+  ocean:'<path d="M2 15c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 19c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M7 10c1-4 6-6 9-3"/>',
+  rain:'<path d="M7 15a4 4 0 1 1 1-7.9A5 5 0 0 1 17.6 8 3.5 3.5 0 0 1 17 15z"/><path d="M9 18l-1 2M13 18l-1 2M17 18l-1 2"/>',
+  bowl:'<path d="M3 11h18a9 9 0 0 1-18 0zM8 20h8"/><path d="M12 7c0-2 1.5-3 3-3"/>',
+  phones:'<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>',
+  piano:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 5v8M12 5v8M16 5v8M8 13v6M12 13v6M16 13v6"/>',
+  cradle:'<path d="M4 12h16a8 6 0 0 1-16 0zM6 20l2-2M18 20l-2-2"/><path d="M14 4.5A3.5 3.5 0 1 0 17.5 8 2.7 2.7 0 0 1 14 4.5z"/>'
+};
+
+const LULLABY = (() => { // Brahms "Wiegenlied" (public domain), C major, beats
+  const s = 'E5 .5,E5 .5,G5 2,E5 .5,E5 .5,G5 2,E5 .5,G5 .5,C6 1,B5 1.5,A5 .5,A5 1,G5 1,D5 .5,E5 .5,F5 1,D5 1,D5 .5,E5 .5,F5 2,D5 .5,F5 .5,B5 .5,A5 .5,G5 1,B5 1,C6 2,C5 .5,C5 .5,C6 2,A5 .5,F5 .5,G5 2,E5 .5,C5 .5,F5 1,G5 1,A5 1,G5 2,C5 .5,C5 .5,C6 2,A5 .5,F5 .5,G5 2,E5 .5,C5 .5,F5 1,E5 1,D5 1,C5 3';
+  return s.split(',').map(x=>{const [n,b]=x.split(' ');return [hz(n),parseFloat(b)];});
+})();
+
+const TRACKS = [
+  { id:'pure', name:'純淨 432', desc:'柔和正弦長音,單純而深沉', icon:'wave', c1:'#c9b8ff', c2:'#6f8cff', wet:.5,
+    start(h){
+      const o=h.bus;
+      drone(h,'sine',108,.10,o);
+      drone(h,'sine',216,.15,o);
+      const g=drone(h,'sine',432,.08,o); lfo(h,.055,.045,g.gain);
+      drone(h,'sine',432.7,.03,o);
+      const g5=drone(h,'sine',648,.022,o); lfo(h,.037,.018,g5.gain);
+      const g8=drone(h,'sine',864,.01,o); lfo(h,.023,.009,g8.gain);
+    }},
+  { id:'stars', name:'星空音盒', desc:'五聲音階的星光鈴音,隨機飄落', icon:'star', c1:'#ffd59a', c2:'#c47cff', wet:.65,
+    start(h){
+      const o=h.bus;
+      const g1=drone(h,'sine',hz('C3'),.05,o); lfo(h,.05,.03,g1.gain);
+      drone(h,'sine',hz('G3'),.025,o);
+      const scale=['C5','D5','E5','G5','A5','C6','D6','E6','G6'].map(hz);
+      let i=3;
+      h.sched(t=>{
+        i=Math.max(0,Math.min(scale.length-1,i+pick([-2,-1,-1,1,1,2,0])));
+        bell(o, scale[i], t, rnd(.07,.12), 4.5);
+        if (Math.random()<.18) bell(o, scale[Math.max(0,i-3)], t+.02, .05, 4);
+        return t + (Math.random()<.12 ? rnd(3,5) : pick([.6,.9,1.2,1.2,1.8]));
+      });
+    }},
+  { id:'ocean', name:'深海呼吸', desc:'海浪起伏如緩慢呼吸,約 12 秒一次', icon:'ocean', c1:'#7fd8ff', c2:'#2f5fd0', wet:.25,
+    start(h){
+      const o=h.bus;
+      const swell=gain(.32,o);
+      const lp=filter('lowpass',520,.6,swell);
+      noise(h,'brown',1,lp);
+      const wave=lfo(h,1/12,.26,swell.gain);
+      const fg=gain(330); wave.connect(fg); fg.connect(lp.frequency);
+      const hiss=gain(.025,o); const hp=filter('highpass',2500,.5,hiss); noise(h,'pink',1,hp);
+      const hg=gain(.02); wave.connect(hg); hg.connect(hiss.gain);
+      drone(h,'sine',108,.05,o); drone(h,'sine',216,.025,o);
+    }},
+  { id:'rain', name:'雨夜窗邊', desc:'細雨聲伴著溫暖和弦', icon:'rain', c1:'#9fb7d9', c2:'#4a5d8f', wet:.45,
+    start(h){
+      const o=h.bus;
+      const r=gain(.16,o); const lp=filter('lowpass',7000,.4,r); const hp=filter('highpass',450,.4,lp); noise(h,'pink',1,hp);
+      const rum=gain(.12,o); const lp2=filter('lowpass',180,.5,rum); noise(h,'brown',1,lp2);
+      const chords=[['A2','E3','C4','E4'],['F2','C3','A3','C4'],['C3','G3','E4','G4'],['G2','D3','B3','D4']].map(c=>c.map(hz));
+      let k=0;
+      h.sched(t=>{ pad(o, chords[k++%chords.length], t, 13, .05, 800); return t+10; });
+      h.sched(t=>{ // occasional drip
+        const f=rnd(1800,3200); const os=ctx.createOscillator(); os.frequency.setValueAtTime(f,t); os.frequency.exponentialRampToValueAtTime(f*.6,t+.08);
+        const g=ctx.createGain(); g.gain.setValueAtTime(.012,t); g.gain.exponentialRampToValueAtTime(.0001,t+.12);
+        os.connect(g); g.connect(o); os.start(t); os.stop(t+.15);
+        return t+rnd(.8,3);
+      });
+    }},
+  { id:'bowl', name:'頌缽療癒', desc:'西藏頌缽的悠長泛音', icon:'bowl', c1:'#ffc58f', c2:'#c06a3c', wet:.55,
+    start(h){
+      const o=h.bus;
+      drone(h,'sine',108,.04,o);
+      const notes=['A3','C4','D4','E4','G4','A4'].map(hz);
+      h.sched(t=>{ bowl(o, pick(notes), t, rnd(.10,.15)); return t+rnd(7,12); });
+    }},
+  { id:'delta', name:'雙耳節拍', desc:'3Hz δ 波,左右耳微差・請戴耳機', icon:'phones', c1:'#a6f0d0', c2:'#3c8f9e', wet:0,
+    start(h){
+      const m=ctx.createChannelMerger(2); m.connect(h.bus);
+      const L=gain(1); L.connect(m,0,0); const R=gain(1); R.connect(m,0,1);
+      drone(h,'sine',216,.13,L); drone(h,'sine',219,.13,R);
+      drone(h,'sine',432,.04,L); drone(h,'sine',435,.04,R);
+      const ng=gain(.05,h.bus); const lp=filter('lowpass',900,.5,ng); noise(h,'pink',1,lp);
+    }},
+  { id:'piano', name:'月光鋼琴', desc:'緩慢分解和弦,像月光灑落', icon:'piano', c1:'#e2d6ff', c2:'#7867c9', wet:.55,
+    start(h){
+      const o=h.bus;
+      const prog=[['C3','G3','E4','B4','D5'],['A2','E3','C4','G4','B4'],['F2','C3','A3','E4','G4'],['G2','D3','B3','E4','A4']].map(c=>c.map(hz));
+      const pat=[0,1,2,3,2,1,4,2]; let step=0;
+      h.sched(t=>{
+        const chord=prog[Math.floor(step/16)%prog.length];
+        const p=pat[step%pat.length];
+        piano(o, chord[p], t, p===0 ? .16 : rnd(.07,.11));
+        if (step%8===4 && Math.random()<.5) piano(o, chord[pick([3,4])]*2, t+.01, .05);
+        step++;
+        return t + .78 + rnd(-.03,.05);
+      });
+    }},
+  { id:'lullaby', name:'搖籃曲', desc:'布拉姆斯搖籃曲・音盒版', icon:'cradle', c1:'#ffb3c7', c2:'#9b6bd8', wet:.6,
+    start(h){
+      const o=h.bus;
+      const g=drone(h,'sine',hz('C3'),.045,o); lfo(h,.06,.02,g.gain);
+      drone(h,'sine',hz('G3'),.018,o);
+      const beat=.78; let n=0;
+      h.sched(t=>{
+        const [f,b]=LULLABY[n];
+        bell(o, f, t, .11, Math.max(3, b*2.2));
+        if (b>=2) bell(o, f/2, t+.01, .04, 4);
+        n++;
+        if (n>=LULLABY.length){ n=0; return t + b*beat + beat*5; }
+        return t + b*beat;
+      });
+    }}
+];
+
+/* ---- track lifecycle ---- */
+const LOOKAHEAD = 12; // seconds of audio scheduled in advance (survives JS throttling)
+let current = null;
+function startTrack(tr){
+  const now=ctx.currentTime;
+  const bus=ctx.createGain();
+  bus.gain.setValueAtTime(0,now); bus.gain.linearRampToValueAtTime(1, now+3);
+  bus.connect(master);
+  if (tr.wet){ const s=gain(tr.wet, reverbIn); bus.connect(s); }
+  const h={ bus, nodes:[], timers:[], wet:tr.wet };
+  h.sched = fn => {
+    let next = ctx.currentTime + .15;
+    const tick = () => { while (next < ctx.currentTime + LOOKAHEAD) next = fn(next); };
+    tick(); h.timers.push(setInterval(tick, 1000));
+  };
+  tr.start(h);
+  return h;
+}
+function stopTrack(h){
+  if (!h) return;
+  const now=ctx.currentTime;
+  h.bus.gain.cancelScheduledValues(now);
+  h.bus.gain.setValueAtTime(h.bus.gain.value, now);
+  h.bus.gain.linearRampToValueAtTime(0, now+1.5);
+  h.timers.forEach(clearInterval);
+  setTimeout(()=>{ h.nodes.forEach(n=>{try{n.stop()}catch(e){}}); try{h.bus.disconnect()}catch(e){} }, 1800);
+}
+
+/* ================= Keep-alive <audio> (iOS 靜音鍵 / 鎖屏控制) ================= */
+const keepAlive = document.getElementById('keepAlive');
+(function(){
+  const sr=8000, n=sr; const b=new ArrayBuffer(44+n*2); const v=new DataView(b);
+  const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+  keepAlive.src=URL.createObjectURL(new Blob([b],{type:'audio/wav'}));
+})();
+
+/* ================= State ================= */
+const store = {
+  get(){ try{ return JSON.parse(localStorage.getItem('sleep432')||'{}'); }catch(e){ return {}; } },
+  set(o){ try{ localStorage.setItem('sleep432', JSON.stringify(o)); }catch(e){} }
+};
+const saved = store.get();
+const state = {
+  idx: Number.isInteger(saved.idx) && saved.idx < TRACKS.length ? saved.idx : 0,
+  vol: typeof saved.vol==='number' ? saved.vol : 60,
+  timerMin: typeof saved.timerMin==='number' ? saved.timerMin : 60,
+  playing:false,
+  remaining:0, // seconds
+  endAt:0
+};
+state.remaining = state.timerMin*60;
+const persist = () => store.set({idx:state.idx, vol:state.vol, timerMin:state.timerMin});
+function volToGain(v){ return Math.pow(v/100, 2) * 1.6; }
+
+/* ================= Sleep timer ================= */
+const FADE_MAX = 90;
+function timeLeft(){
+  if (!state.timerMin) return Infinity;
+  return state.playing ? Math.max(0,(state.endAt-Date.now())/1000) : state.remaining;
+}
+function scheduleFade(){
+  if (!ctx) return;
+  const g=timerGain.gain, now=ctx.currentTime;
+  g.cancelScheduledValues(now);
+  if (!state.timerMin){ g.setValueAtTime(1, now); return; }
+  const rem=timeLeft();
+  const fade=Math.min(FADE_MAX, state.timerMin*60*.15);
+  const level = rem>fade ? 1 : Math.max(0, rem/fade);
+  g.setValueAtTime(level, now);
+  if (rem>fade) g.setValueAtTime(1, now+rem-fade);
+  g.linearRampToValueAtTime(0, now+Math.max(.05,rem));
+}
+function setTimer(min){
+  state.timerMin=min;
+  state.remaining=min*60;
+  if (state.playing) state.endAt=Date.now()+state.remaining*1000;
+  scheduleFade(); persist(); renderTimer(); renderChips();
+}
+function timerDone(){
+  pause(true);
+  state.remaining=state.timerMin*60;
+  if (ctx){ timerGain.gain.cancelScheduledValues(ctx.currentTime); timerGain.gain.setValueAtTime(1, ctx.currentTime); }
+  renderTimer();
+  toast('晚安,好夢 🌙');
+  if (nightOn) setTimeout(()=>{ document.getElementById('nRem').textContent='音樂已停止・晚安'; }, 100);
+}
+
+/* ================= Transport ================= */
+async function play(){
+  initAudio();
+  try{ await ctx.resume(); }catch(e){}
+  keepAlive.play().catch(()=>{});
+  master.gain.cancelScheduledValues(ctx.currentTime);
+  master.gain.setTargetAtTime(volToGain(state.vol), ctx.currentTime, .1);
+  if (!current) current = startTrack(TRACKS[state.idx]);
+  state.playing = true;
+  if (state.timerMin){
+    if (state.remaining<=1) state.remaining=state.timerMin*60;
+    state.endAt=Date.now()+state.remaining*1000;
+  }
+  scheduleFade();
+  renderPlay(); updateMedia();
+}
+function pause(fromTimer){
+  if (!state.playing) return;
+  state.remaining = state.timerMin ? Math.max(0,(state.endAt-Date.now())/1000) : 0;
+  state.playing=false;
+  const doSuspend=()=>{ if(!state.playing && ctx) ctx.suspend().catch(()=>{}); };
+  if (ctx){
+    // short fade to avoid a click
+    const g=master.gain, now=ctx.currentTime;
+    g.cancelScheduledValues(now); g.setValueAtTime(g.value,now); g.linearRampToValueAtTime(0, now+.4);
+    setTimeout(()=>{ doSuspend(); if(!state.playing){ master.gain.cancelScheduledValues(0); master.gain.value=volToGain(state.vol);} }, 450);
+  }
+  keepAlive.pause();
+  renderPlay(); updateMedia();
+}
+function selectTrack(i, autoplay){
+  state.idx=(i+TRACKS.length)%TRACKS.length; persist(); renderTrack();
+  if (current){ stopTrack(current); current=null; }
+  if (state.playing){ current=startTrack(TRACKS[state.idx]); updateMedia(); }
+  else if (autoplay) play();
+}
+
+/* ================= UI ================= */
+const $ = id => document.getElementById(id);
+const appEl=$('app');
+const fmt = s => { s=Math.ceil(s); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), x=s%60;
+  return (h? h+':'+String(m).padStart(2,'0') : String(m).padStart(2,'0'))+':'+String(x).padStart(2,'0'); };
+const clock = d => String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+
+const PLAY_SVG='<svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>';
+const PAUSE_SVG='<svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>';
+
+function renderPlay(){
+  $('playIco').innerHTML = state.playing ? PAUSE_SVG : PLAY_SVG;
+  $('playBtn').setAttribute('aria-label', state.playing?'暫停':'播放');
+  appEl.classList.toggle('playing', state.playing);
+  document.body.classList.toggle('playing', state.playing);
+}
+function renderTrack(){
+  const t=TRACKS[state.idx];
+  $('nowName').textContent=t.name; $('nowDesc').textContent=t.desc;
+  document.documentElement.style.setProperty('--t1', t.c1);
+  document.documentElement.style.setProperty('--t2', t.c2);
+  document.querySelectorAll('.track').forEach((el,i)=>el.classList.toggle('on', i===state.idx));
+  updateSliderFill($('vol')); updateSliderFill($('custom'));
+}
+function renderTracks(){
+  $('tracks').innerHTML = TRACKS.map((t,i)=>`
+    <button class="track" style="--c1:${t.c1};--c2:${t.c2}" data-i="${i}">
+      <span class="t-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[t.icon]}</svg></span>
+      <span class="eq"><i></i><i></i><i></i></span>
+      <span class="t-name">${t.name}</span>
+      <span class="t-desc">${t.desc}</span>
+    </button>`).join('');
+  $('tracks').addEventListener('click', e=>{
+    const b=e.target.closest('.track'); if(!b) return;
+    const i=+b.dataset.i;
+    if (i===state.idx && current){ state.playing ? pause() : play(); return; }
+    selectTrack(i, true);
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+}
+const CHIP_VALUES=[15,30,45,60,90,120,180,0];
+function renderChips(){
+  $('chips').innerHTML = CHIP_VALUES.map(v=>`<button class="chip${v===state.timerMin?' on':''}" data-v="${v}">${v? (v%60===0? v/60+' 小時' : v+' 分') : '不關閉'}</button>`).join('');
+  if (state.timerMin){ $('custom').value=state.timerMin; }
+  $('customOut').textContent = state.timerMin ? state.timerMin+' 分鐘' : '—';
+  updateSliderFill($('custom'));
+}
+const RING_LEN=295.3;
+function renderTimer(){
+  const rem=timeLeft();
+  if (!state.timerMin){
+    $('remain').textContent='∞';
+    $('remainSub').textContent='不會自動關閉';
+    $('ringPrg').style.strokeDashoffset=0;
+    return;
+  }
+  $('remain').textContent=fmt(rem);
+  if (state.playing){
+    $('remainSub').textContent='將於 '+clock(new Date(state.endAt))+' 停止' + (rem<FADE_MAX?' ・ 正在淡出…':'');
+  } else {
+    $('remainSub').textContent= rem < state.timerMin*60-1 ? '已暫停 ・ 繼續播放後接著倒數' : '播放後開始倒數,結束前會慢慢淡出';
+  }
+  $('ringPrg').style.strokeDashoffset = RING_LEN*(1-rem/(state.timerMin*60));
+}
+function updateSliderFill(el){
+  const p=(el.value-el.min)/(el.max-el.min)*100; el.style.setProperty('--p', p+'%');
+}
+let toastT;
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
+
+/* ---- events ---- */
+$('playBtn').addEventListener('click', ()=> state.playing ? pause() : play());
+$('prevBtn').addEventListener('click', ()=> selectTrack(state.idx-1, state.playing));
+$('nextBtn').addEventListener('click', ()=> selectTrack(state.idx+1, state.playing));
+$('vol').addEventListener('input', e=>{
+  state.vol=+e.target.value; updateSliderFill(e.target); persist();
+  if (ctx && state.playing) master.gain.setTargetAtTime(volToGain(state.vol), ctx.currentTime, .08);
+});
+$('chips').addEventListener('click', e=>{
+  const b=e.target.closest('.chip'); if(!b) return;
+  setTimer(+b.dataset.v);
+  toast(+b.dataset.v ? '已設定 '+b.textContent+' 後關閉' : '已關閉定時');
+});
+$('custom').addEventListener('input', e=>{ updateSliderFill(e.target); $('customOut').textContent=e.target.value+' 分鐘'; });
+$('custom').addEventListener('change', e=>{ setTimer(+e.target.value); toast('已設定 '+e.target.value+' 分鐘後關閉'); });
+
+/* ---- night mode ---- */
+let nightOn=false, wakeLock=null;
+async function setNight(on){
+  nightOn=on; const n=$('night');
+  if (on){ n.classList.add('show'); requestAnimationFrame(()=>n.classList.add('vis')); updateNight();
+    try{ if('wakeLock' in navigator) wakeLock=await navigator.wakeLock.request('screen'); }catch(e){}
+  } else { n.classList.remove('vis'); setTimeout(()=>n.classList.remove('show'),800);
+    try{ wakeLock && wakeLock.release(); }catch(e){} wakeLock=null; }
+}
+function updateNight(){
+  if (!nightOn) return;
+  $('nClock').textContent=clock(new Date());
+  if (state.playing) $('nRem').textContent = state.timerMin ? TRACKS[state.idx].name+' ・ 剩餘 '+fmt(timeLeft()) : TRACKS[state.idx].name;
+  else if (!$('nRem').textContent.includes('晚安')) $('nRem').textContent='已暫停';
+}
+$('nightBtn').addEventListener('click', ()=>setNight(true));
+$('night').addEventListener('click', ()=>setNight(false));
+
+/* ---- media session ---- */
+function updateMedia(){
+  if (!('mediaSession' in navigator)) return;
+  const t=TRACKS[state.idx];
+  try{
+    navigator.mediaSession.metadata=new MediaMetadata({title:t.name, artist:'好眠 432 ・ 432Hz 睡前音樂', album:t.desc,
+      artwork:[{src:'icon-512.png',sizes:'512x512',type:'image/png'}]});
+    navigator.mediaSession.playbackState = state.playing?'playing':'paused';
+  }catch(e){}
+}
+if ('mediaSession' in navigator){
+  const ms=navigator.mediaSession;
+  try{
+    ms.setActionHandler('play', ()=>play());
+    ms.setActionHandler('pause', ()=>pause());
+    ms.setActionHandler('previoustrack', ()=>selectTrack(state.idx-1, state.playing));
+    ms.setActionHandler('nexttrack', ()=>selectTrack(state.idx+1, state.playing));
+  }catch(e){}
+}
+
+/* ---- main tick ---- */
+setInterval(()=>{
+  if (state.playing && state.timerMin && Date.now()>=state.endAt) timerDone();
+  renderTimer(); updateNight();
+}, 500);
+document.addEventListener('visibilitychange', ()=>{
+  if (document.visibilityState==='visible'){
+    if (state.playing && state.timerMin && Date.now()>=state.endAt) timerDone();
+    else if (state.playing && ctx && ctx.state!=='running') ctx.resume().catch(()=>{});
+    if (nightOn && 'wakeLock' in navigator) navigator.wakeLock.request('screen').then(w=>wakeLock=w).catch(()=>{});
+  }
+});
+
+/* ================= Visuals ================= */
+// starry sky
+const sky=$('sky'), sc=sky.getContext('2d');
+let stars=[], shoot=null, DPR=Math.min(2, window.devicePixelRatio||1);
+function sizeSky(){
+  sky.width=innerWidth*DPR; sky.height=innerHeight*DPR;
+  const n=Math.round(innerWidth*innerHeight/5000);
+  stars=Array.from({length:n},()=>({x:Math.random()*sky.width,y:Math.random()*sky.height,r:(Math.random()*1.1+.25)*DPR,
+    p:Math.random()*Math.PI*2,s:rnd(.3,1.2)}));
+}
+sizeSky(); addEventListener('resize', ()=>{ sizeSky(); sizeViz(); });
+
+// visualizer around orb
+const viz=$('viz'), vc=viz.getContext('2d');
+function sizeViz(){ const r=viz.getBoundingClientRect(); viz.width=r.width*DPR; viz.height=r.height*DPR; }
+sizeViz();
+let fbuf=null, levelSm=0;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function frame(ts){
+  // sky
+  sc.clearRect(0,0,sky.width,sky.height);
+  for (const s of stars){
+    const a=.35+.65*(.5+.5*Math.sin(ts*.001*s.s+s.p));
+    sc.globalAlpha=a*.85; sc.fillStyle='#fff';
+    sc.beginPath(); sc.arc(s.x,s.y,s.r,0,6.283); sc.fill();
+  }
+  if (!reduce){
+    if (!shoot && Math.random()<.002) shoot={x:Math.random()*sky.width*.8,y:Math.random()*sky.height*.4,l:0};
+    if (shoot){
+      shoot.l+=12*DPR; const len=Math.min(shoot.l,120*DPR);
+      const x2=shoot.x+shoot.l, y2=shoot.y+shoot.l*.45;
+      const g=sc.createLinearGradient(x2-len,y2-len*.45,x2,y2); g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(1,'rgba(255,255,255,.8)');
+      sc.globalAlpha=1; sc.strokeStyle=g; sc.lineWidth=1.4*DPR; sc.beginPath(); sc.moveTo(x2-len,y2-len*.45); sc.lineTo(x2,y2); sc.stroke();
+      if (shoot.l>sky.width*.5) shoot=null;
+    }
+  }
+  sc.globalAlpha=1;
+
+  // ring visualizer
+  const W=viz.width, H=viz.height, cx=W/2, cy=H/2;
+  vc.clearRect(0,0,W,H);
+  let data=null;
+  if (analyser && state.playing){
+    if (!fbuf) fbuf=new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(fbuf); data=fbuf;
+  }
+  const bars=96, r0=W*.30, maxL=W*.17;
+  const col=getComputedStyle(document.documentElement).getPropertyValue('--t1').trim()||'#c9b8ff';
+  vc.strokeStyle=col; vc.lineCap='round'; vc.lineWidth=2*DPR;
+  let sum=0;
+  for (let i=0;i<bars;i++){
+    const k = i<bars/2 ? i : bars-1-i; // mirrored
+    let v=0;
+    if (data){ const bin=Math.floor(2+Math.pow(k/(bars/2),1.6)*90); v=data[bin]/255; sum+=v; }
+    const idle=.04+.03*Math.sin(ts*.0012+i*.4);
+    const L=(Math.max(v*v*1.4, state.playing?idle:.02))*maxL;
+    const a=i/bars*Math.PI*2 - Math.PI/2 + ts*.00004;
+    vc.globalAlpha=.25+.6*Math.min(1,v*1.3);
+    vc.beginPath();
+    vc.moveTo(cx+Math.cos(a)*r0, cy+Math.sin(a)*r0);
+    vc.lineTo(cx+Math.cos(a)*(r0+L+2*DPR), cy+Math.sin(a)*(r0+L+2*DPR));
+    vc.stroke();
+  }
+  levelSm += ((sum/bars)-levelSm)*.06;
+  // soft halo
+  vc.globalAlpha=.18+levelSm*.8;
+  const hg=vc.createRadialGradient(cx,cy,r0*.6,cx,cy,W*.5);
+  hg.addColorStop(0,col); hg.addColorStop(1,'rgba(0,0,0,0)');
+  vc.fillStyle=hg; vc.beginPath(); vc.arc(cx,cy,W*.5,0,6.283); vc.fill();
+  vc.globalAlpha=1;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---- boot ---- */
+$('vol').value=state.vol;
+renderTracks(); renderChips(); renderTrack(); renderPlay(); renderTimer();
+
+if ('serviceWorker' in navigator && location.protocol==='https:'){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+})();
+</script>
+</body>
+</html>
