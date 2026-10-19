@@ -1,0 +1,119 @@
+{
+  "app": {
+    "name": "432Hz 睡眠音樂",
+    "version": "1.0.0",
+    "language": "zh-TW",
+    "description": "以 432Hz 調音為主的助眠音樂,幫助你放鬆身心、安穩入睡。"
+  },
+
+  "about": {
+    "title": "關於 432Hz",
+    "content_markdown": "## 關於 432Hz\n\n432Hz 是一種音階調音標準(A4 = 432Hz),許多人覺得聽起來比 440Hz 更溫暖柔和。\n\n> 目前沒有足夠科學證據證明 432Hz 比 440Hz 更能改善睡眠,但音樂本身的放鬆效果有研究支持。"
+  },
+
+  "categories": [
+    { "id": "ambient", "name": "環境音", "icon": "cloud" },
+    { "id": "nature", "name": "自然音", "icon": "leaf" },
+    { "id": "piano", "name": "鋼琴", "icon": "piano" },
+    { "id": "meditation", "name": "冥想", "icon": "lotus" }
+  ],
+
+  "tracks": [
+    {
+      "id": "track_001",
+      "title": "深海靜謐",
+      "artist": "你的名字或團隊",
+      "category": "ambient",
+      "duration_seconds": 3600,
+      "frequency_hz": 432,
+      "bpm": 40,
+      "audio_url": "",
+      "generator": "deep_sea",
+      "cover_url": "",
+      "loopable": true,
+      "is_premium": false,
+      "tags": ["睡眠", "放鬆", "深海"],
+      "description_markdown": "緩慢的低頻海浪聲搭配柔和的 **432Hz** 合成音色。",
+      "license": {
+        "type": "original",
+        "source": "自行創作"
+      }
+    },
+    {
+      "id": "track_002",
+      "title": "森林夜曲",
+      "artist": "你的名字或團隊",
+      "category": "nature",
+      "duration_seconds": 2700,
+      "frequency_hz": 432,
+      "bpm": 50,
+      "audio_url": "",
+      "generator": "forest_night",
+      "cover_url": "",
+      "loopable": true,
+      "is_premium": false,
+      "tags": ["睡眠", "森林", "鋼琴"],
+      "description_markdown": "蟲鳴與微風,搭配輕柔的鋼琴旋律。",
+      "license": {
+        "type": "cc0",
+        "source": "https://example.com/license"
+      }
+    },
+    {
+      "id": "track_003",
+      "title": "星空冥想",
+      "artist": "你的名字或團隊",
+      "category": "meditation",
+      "duration_seconds": 5400,
+      "frequency_hz": 432,
+      "bpm": 36,
+      "audio_url": "",
+      "generator": "starry_meditation",
+      "cover_url": "",
+      "loopable": false,
+      "is_premium": true,
+      "tags": ["冥想", "星空", "純音樂"],
+      "description_markdown": "90 分鐘的純音樂,適合搭配**深呼吸**練習。",
+      "license": {
+        "type": "original",
+        "source": "自行創作"
+      }
+    }
+  ],
+
+  "playlists": [
+    {
+      "id": "playlist_001",
+      "name": "今晚好眠",
+      "description": "睡前 30 分鐘的放鬆組合",
+      "track_ids": ["track_002", "track_001", "track_003"],
+      "shuffle": false
+    }
+  ],
+
+  "sleep_timer": {
+    "enabled": true,
+    "options_minutes": [15, 30, 45, 60, 90],
+    "default_minutes": 30,
+    "fade_out_seconds": 30
+  },
+
+  "player_settings": {
+    "default_volume": 0.4,
+    "crossfade_seconds": 5,
+    "background_playback": true,
+    "keep_screen_off": true
+  },
+
+  "tips": {
+    "title": "使用小提醒",
+    "items": [
+      "建議睡前 30 分鐘開始播放",
+      "音量調低,像背景音一般輕柔即可",
+      "使用喇叭或睡眠耳機,避免耳塞壓迫",
+      "若失眠持續,請諮詢醫師"
+    ]
+  },
+
+  "disclaimer": "本 App 內容僅供放鬆參考,不能取代醫療建議。"
+}
