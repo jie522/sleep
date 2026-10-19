@@ -199,7 +199,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border:0;border-radiu
       <div class="hz-badge">432 Hz</div>
     </div>
     <div class="now">
-      <h2 id="nowName">純淨 432</h2>
+      <h2 id="nowName">清理負面情緒</h2>
       <p id="nowDesc">輕觸播放,讓身心慢慢沉靜</p>
     </div>
     <div class="transport">
@@ -241,10 +241,10 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border:0;border-radiu
     </div>
   </section>
 
-  <div class="list-title"><h3>音樂清單</h3><span>全部以 A=432Hz 調音・即時生成不重複</span></div>
+  <div class="list-title"><h3>音樂清單</h3><span>432Hz 深度睡眠・α波・即時生成不重複</span></div>
   <section class="tracks" id="tracks"></section>
 
-  <p class="tip">建議音量放低,手機可開啟<b>夜燈模式</b>讓螢幕全黑仍持續播放。<br>「雙耳節拍」請配戴耳機效果最佳。</p>
+  <p class="tip">建議音量放低,手機可開啟<b>夜燈模式</b>讓螢幕全黑仍持續播放。<br>配戴耳機可感受 α 波雙耳節拍,幫助放鬆入睡。</p>
 </div>
 
 <div id="night" role="button" aria-label="輕觸返回">
@@ -379,132 +379,90 @@ function pad(dest, freqs, t, dur, vol, cutoff=900){
     const og=gain(.5/freqs.length,f); o.connect(og); o.start(t); o.stop(t+dur+.05);
   }
 }
-function bowl(dest, freq, t, vel){
-  const parts=[[1,1,16],[2.71,.42,10],[5.15,.18,6],[8.2,.07,3.5]];
-  for (const [r,a,dk] of parts){
-    for (const off of [-.45,.45]){
-      const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=freq*r+off*r;
-      const g=ctx.createGain(); g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(vel*a*.5, t+.03);
-      g.gain.exponentialRampToValueAtTime(.0001, t+dk);
-      o.connect(g); g.connect(dest); o.start(t); o.stop(t+dk+.05);
-    }
-  }
-}
 
 /* ================= Tracks ================= */
 const ICONS = {
-  wave:'<path d="M3 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0"/>',
-  star:'<path d="M12 3l2.2 5.6L20 9.3l-4.5 3.8 1.4 5.9L12 16l-4.9 3 1.4-5.9L4 9.3l5.8-.7z"/>',
-  ocean:'<path d="M2 15c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 19c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M7 10c1-4 6-6 9-3"/>',
-  rain:'<path d="M7 15a4 4 0 1 1 1-7.9A5 5 0 0 1 17.6 8 3.5 3.5 0 0 1 17 15z"/><path d="M9 18l-1 2M13 18l-1 2M17 18l-1 2"/>',
-  bowl:'<path d="M3 11h18a9 9 0 0 1-18 0zM8 20h8"/><path d="M12 7c0-2 1.5-3 3-3"/>',
-  phones:'<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>',
-  piano:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 5v8M12 5v8M16 5v8M8 13v6M12 13v6M16 13v6"/>',
-  cradle:'<path d="M4 12h16a8 6 0 0 1-16 0zM6 20l2-2M18 20l-2-2"/><path d="M14 4.5A3.5 3.5 0 1 0 17.5 8 2.7 2.7 0 0 1 14 4.5z"/>'
+  heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  leaf:'<path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14z"/><path d="M5 19l8-8"/>',
+  wave:'<path d="M3 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0"/><path d="M3 17c2-3 4-3 6 0s4 3 6 0 4-3 6 0" opacity=".5"/>',
+  galaxy:'<circle cx="12" cy="12" r="2"/><path d="M12 4c5 0 8 3 8 6M12 20c-5 0-8-3-8-6M20 14c0 3-3 6-8 6M4 10c0-3 3-6 8-6"/>'
 };
 
-const LULLABY = (() => { // Brahms "Wiegenlied" (public domain), C major, beats
-  const s = 'E5 .5,E5 .5,G5 2,E5 .5,E5 .5,G5 2,E5 .5,G5 .5,C6 1,B5 1.5,A5 .5,A5 1,G5 1,D5 .5,E5 .5,F5 1,D5 1,D5 .5,E5 .5,F5 2,D5 .5,F5 .5,B5 .5,A5 .5,G5 1,B5 1,C6 2,C5 .5,C5 .5,C6 2,A5 .5,F5 .5,G5 2,E5 .5,C5 .5,F5 1,G5 1,A5 1,G5 2,C5 .5,C5 .5,C6 2,A5 .5,F5 .5,G5 2,E5 .5,C5 .5,F5 1,E5 1,D5 1,C5 3';
-  return s.split(',').map(x=>{const [n,b]=x.split(' ');return [hz(n),parseFloat(b)];});
-})();
+/* ---- 共用:深度睡眠氛圍引擎(長音鋪底 + 稀疏鋼琴 + α 波雙耳節拍 + 自然聲) ---- */
+function ambient(h, o){
+  const out=h.bus;
+  // 低頻鋪底
+  const sub=drone(h,'sine',o.root/2,.07,out); lfo(h,.04,.025,sub.gain);
+  drone(h,'sine',o.root,.035,out);
+  // α 波雙耳節拍:左右耳差 o.alpha Hz(戴耳機最明顯)
+  const m=ctx.createChannelMerger(2); m.connect(out);
+  const L=gain(1); L.connect(m,0,0); const R=gain(1); R.connect(m,0,1);
+  drone(h,'sine',216,.03,L); drone(h,'sine',216+o.alpha,.03,R);
+  // 自然聲
+  if (o.nature==='wind'){
+    const w=gain(.05,out); const bp=filter('bandpass',500,.8,w); noise(h,'pink',1,bp);
+    lfo(h,.05,300,bp.frequency); lfo(h,.08,.03,w.gain);
+  } else if (o.nature==='stream'){
+    const w=gain(.035,out); const bp=filter('bandpass',2200,.5,w); noise(h,'pink',1,bp);
+    lfo(h,.3,600,bp.frequency); lfo(h,.17,.012,w.gain);
+    const lowW=gain(.04,out); noise(h,'brown',1,filter('lowpass',300,.5,lowW));
+  } else if (o.nature==='crickets'){
+    h.sched(t=>{
+      const f=rnd(4200,4700), p=ctx.createStereoPanner?ctx.createStereoPanner():null;
+      const g=ctx.createGain(); g.gain.value=0;
+      if (p){ p.pan.value=rnd(-.8,.8); g.connect(p); p.connect(out); } else g.connect(out);
+      const os=ctx.createOscillator(); os.frequency.value=f; os.connect(g);
+      const v=rnd(.004,.009);
+      for (let k=0;k<3;k++){ const s=t+k*.07; g.gain.setValueAtTime(0,s); g.gain.linearRampToValueAtTime(v,s+.01); g.gain.linearRampToValueAtTime(0,s+.045); }
+      os.start(t); os.stop(t+.25);
+      return t+rnd(.6,2.2);
+    });
+  }
+  // 和弦長音:每個和弦 o.chordLen 秒,前後交疊
+  const chords=o.chords.map(c=>c.map(hz)); let k=0;
+  h.sched(t=>{
+    const c=chords[k++%chords.length];
+    pad(out, c, t, o.chordLen*1.6, .045, o.cutoff);
+    // 一層柔和正弦,讓聲音更圓潤
+    for (const fr of c.slice(1)){
+      const os=ctx.createOscillator(); os.frequency.value=fr;
+      const g=ctx.createGain(); g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(.018,t+o.chordLen*.5); g.gain.linearRampToValueAtTime(0,t+o.chordLen*1.6);
+      os.connect(g); g.connect(out); os.start(t); os.stop(t+o.chordLen*1.6+.1);
+    }
+    h.chord=c;
+    return t+o.chordLen;
+  });
+  // 稀疏鋼琴旋律:從當下和弦與五聲音階挑音,慢慢飄落
+  const mel=o.melody.map(hz); let i=Math.floor(mel.length/2);
+  h.sched(t=>{
+    if (Math.random()<o.density){
+      i=Math.max(0,Math.min(mel.length-1,i+pick([-2,-1,-1,0,1,1,2])));
+      piano(out, mel[i], t, rnd(.05,.085));
+      if (Math.random()<.25) piano(out, mel[i]/2, t+.02, .035);
+    }
+    if (o.bells && Math.random()<.12) bell(out, mel[Math.min(mel.length-1,i+2)]*2, t+.4, .025, 5);
+    return t + pick([1.6,2.4,2.4,3.2,4.8]);
+  });
+}
 
 const TRACKS = [
-  { id:'pure', name:'純淨 432', desc:'柔和正弦長音,單純而深沉', icon:'wave', c1:'#c9b8ff', c2:'#6f8cff', wet:.5,
-    start(h){
-      const o=h.bus;
-      drone(h,'sine',108,.10,o);
-      drone(h,'sine',216,.15,o);
-      const g=drone(h,'sine',432,.08,o); lfo(h,.055,.045,g.gain);
-      drone(h,'sine',432.7,.03,o);
-      const g5=drone(h,'sine',648,.022,o); lfo(h,.037,.018,g5.gain);
-      const g8=drone(h,'sine',864,.01,o); lfo(h,.023,.009,g8.gain);
-    }},
-  { id:'stars', name:'星空音盒', desc:'五聲音階的星光鈴音,隨機飄落', icon:'star', c1:'#ffd59a', c2:'#c47cff', wet:.65,
-    start(h){
-      const o=h.bus;
-      const g1=drone(h,'sine',hz('C3'),.05,o); lfo(h,.05,.03,g1.gain);
-      drone(h,'sine',hz('G3'),.025,o);
-      const scale=['C5','D5','E5','G5','A5','C6','D6','E6','G6'].map(hz);
-      let i=3;
-      h.sched(t=>{
-        i=Math.max(0,Math.min(scale.length-1,i+pick([-2,-1,-1,1,1,2,0])));
-        bell(o, scale[i], t, rnd(.07,.12), 4.5);
-        if (Math.random()<.18) bell(o, scale[Math.max(0,i-3)], t+.02, .05, 4);
-        return t + (Math.random()<.12 ? rnd(3,5) : pick([.6,.9,1.2,1.2,1.8]));
-      });
-    }},
-  { id:'ocean', name:'深海呼吸', desc:'海浪起伏如緩慢呼吸,約 12 秒一次', icon:'ocean', c1:'#7fd8ff', c2:'#2f5fd0', wet:.25,
-    start(h){
-      const o=h.bus;
-      const swell=gain(.32,o);
-      const lp=filter('lowpass',520,.6,swell);
-      noise(h,'brown',1,lp);
-      const wave=lfo(h,1/12,.26,swell.gain);
-      const fg=gain(330); wave.connect(fg); fg.connect(lp.frequency);
-      const hiss=gain(.025,o); const hp=filter('highpass',2500,.5,hiss); noise(h,'pink',1,hp);
-      const hg=gain(.02); wave.connect(hg); hg.connect(hiss.gain);
-      drone(h,'sine',108,.05,o); drone(h,'sine',216,.025,o);
-    }},
-  { id:'rain', name:'雨夜窗邊', desc:'細雨聲伴著溫暖和弦', icon:'rain', c1:'#9fb7d9', c2:'#4a5d8f', wet:.45,
-    start(h){
-      const o=h.bus;
-      const r=gain(.16,o); const lp=filter('lowpass',7000,.4,r); const hp=filter('highpass',450,.4,lp); noise(h,'pink',1,hp);
-      const rum=gain(.12,o); const lp2=filter('lowpass',180,.5,rum); noise(h,'brown',1,lp2);
-      const chords=[['A2','E3','C4','E4'],['F2','C3','A3','C4'],['C3','G3','E4','G4'],['G2','D3','B3','D4']].map(c=>c.map(hz));
-      let k=0;
-      h.sched(t=>{ pad(o, chords[k++%chords.length], t, 13, .05, 800); return t+10; });
-      h.sched(t=>{ // occasional drip
-        const f=rnd(1800,3200); const os=ctx.createOscillator(); os.frequency.setValueAtTime(f,t); os.frequency.exponentialRampToValueAtTime(f*.6,t+.08);
-        const g=ctx.createGain(); g.gain.setValueAtTime(.012,t); g.gain.exponentialRampToValueAtTime(.0001,t+.12);
-        os.connect(g); g.connect(o); os.start(t); os.stop(t+.15);
-        return t+rnd(.8,3);
-      });
-    }},
-  { id:'bowl', name:'頌缽療癒', desc:'西藏頌缽的悠長泛音', icon:'bowl', c1:'#ffc58f', c2:'#c06a3c', wet:.55,
-    start(h){
-      const o=h.bus;
-      drone(h,'sine',108,.04,o);
-      const notes=['A3','C4','D4','E4','G4','A4'].map(hz);
-      h.sched(t=>{ bowl(o, pick(notes), t, rnd(.10,.15)); return t+rnd(7,12); });
-    }},
-  { id:'delta', name:'雙耳節拍', desc:'3Hz δ 波,左右耳微差・請戴耳機', icon:'phones', c1:'#a6f0d0', c2:'#3c8f9e', wet:0,
-    start(h){
-      const m=ctx.createChannelMerger(2); m.connect(h.bus);
-      const L=gain(1); L.connect(m,0,0); const R=gain(1); R.connect(m,0,1);
-      drone(h,'sine',216,.13,L); drone(h,'sine',219,.13,R);
-      drone(h,'sine',432,.04,L); drone(h,'sine',435,.04,R);
-      const ng=gain(.05,h.bus); const lp=filter('lowpass',900,.5,ng); noise(h,'pink',1,lp);
-    }},
-  { id:'piano', name:'月光鋼琴', desc:'緩慢分解和弦,像月光灑落', icon:'piano', c1:'#e2d6ff', c2:'#7867c9', wet:.55,
-    start(h){
-      const o=h.bus;
-      const prog=[['C3','G3','E4','B4','D5'],['A2','E3','C4','G4','B4'],['F2','C3','A3','E4','G4'],['G2','D3','B3','E4','A4']].map(c=>c.map(hz));
-      const pat=[0,1,2,3,2,1,4,2]; let step=0;
-      h.sched(t=>{
-        const chord=prog[Math.floor(step/16)%prog.length];
-        const p=pat[step%pat.length];
-        piano(o, chord[p], t, p===0 ? .16 : rnd(.07,.11));
-        if (step%8===4 && Math.random()<.5) piano(o, chord[pick([3,4])]*2, t+.01, .05);
-        step++;
-        return t + .78 + rnd(-.03,.05);
-      });
-    }},
-  { id:'lullaby', name:'搖籃曲', desc:'布拉姆斯搖籃曲・音盒版', icon:'cradle', c1:'#ffb3c7', c2:'#9b6bd8', wet:.6,
-    start(h){
-      const o=h.bus;
-      const g=drone(h,'sine',hz('C3'),.045,o); lfo(h,.06,.02,g.gain);
-      drone(h,'sine',hz('G3'),.018,o);
-      const beat=.78; let n=0;
-      h.sched(t=>{
-        const [f,b]=LULLABY[n];
-        bell(o, f, t, .11, Math.max(3, b*2.2));
-        if (b>=2) bell(o, f/2, t+.01, .04, 4);
-        n++;
-        if (n>=LULLABY.length){ n=0; return t + b*beat + beat*5; }
-        return t + b*beat;
-      });
-    }}
+  { id:'cleanse', name:'清理負面情緒', desc:'溫暖長音與稀疏琴聲・α波 10Hz', icon:'heart', c1:'#c9b8ff', c2:'#5a6fd8', wet:.7,
+    start(h){ ambient(h,{ root:hz('A2'), alpha:10, chordLen:12, cutoff:900, density:.75, nature:null,
+      chords:[['A2','E3','C4','E4'],['F2','C3','A3','E4'],['C3','G3','E4','G4'],['G2','D3','B3','D4']],
+      melody:['A4','C5','D5','E5','G5','A5','C6'] }); }},
+  { id:'relax', name:'鬆弛肌肉', desc:'更緩慢深沉,微風輕拂・α波 8Hz', icon:'leaf', c1:'#9fe0c8', c2:'#3a7f8f', wet:.7,
+    start(h){ ambient(h,{ root:hz('D3'), alpha:8, chordLen:16, cutoff:750, density:.55, nature:'wind',
+      chords:[['D3','A3','E4','F#4'],['B2','F#3','D4','A4'],['G2','D3','B3','F#4'],['A2','E3','C#4','E4']],
+      melody:['D5','E5','F#5','A5','B5','D6'] }); }},
+  { id:'release', name:'放下壓力', desc:'溪水潺潺,琴聲與鈴音交織・α波 10Hz', icon:'wave', c1:'#8fd3ff', c2:'#3b5fc0', wet:.7,
+    start(h){ ambient(h,{ root:hz('F2'), alpha:10, chordLen:12, cutoff:1000, density:.7, nature:'stream', bells:true,
+      chords:[['F2','C3','A3','E4'],['E2','B2','G3','D4'],['D2','A2','F3','C4'],['C3','G3','E4','B4']],
+      melody:['C5','D5','E5','G5','A5','C6','D6'] }); }},
+  { id:'galaxy', name:'星空冥想', desc:'夏夜蟲鳴下的星河漫步・α波 9Hz', icon:'galaxy', c1:'#ffd59a', c2:'#7a5cd0', wet:.75,
+    start(h){ ambient(h,{ root:hz('E2'), alpha:9, chordLen:14, cutoff:850, density:.6, nature:'crickets', bells:true,
+      chords:[['E2','B2','F#3','B3'],['C3','G3','D4','E4'],['G2','D3','A3','B3'],['D3','A3','E4','F#4']],
+      melody:['E5','F#5','G5','B5','D6','E6'] }); }}
 ];
 
 /* ---- track lifecycle ---- */
@@ -773,12 +731,44 @@ document.addEventListener('visibilitychange', ()=>{
 /* ================= Visuals ================= */
 // starry sky
 const sky=$('sky'), sc=sky.getContext('2d');
-let stars=[], shoot=null, DPR=Math.min(2, window.devicePixelRatio||1);
+let stars=[], shoot=null, DPR=Math.min(2, window.devicePixelRatio||1), band=null, land=null;
 function sizeSky(){
   sky.width=innerWidth*DPR; sky.height=innerHeight*DPR;
   const n=Math.round(innerWidth*innerHeight/5000);
   stars=Array.from({length:n},()=>({x:Math.random()*sky.width,y:Math.random()*sky.height,r:(Math.random()*1.1+.25)*DPR,
     p:Math.random()*Math.PI*2,s:rnd(.3,1.2)}));
+  const W=sky.width, H=sky.height;
+  // 銀河帶:斜向柔光 + 大量微小星點
+  band=document.createElement('canvas'); band.width=W; band.height=H; const b=band.getContext('2d');
+  b.translate(W*.5,H*.42); b.rotate(-0.55);
+  const L=Math.hypot(W,H);
+  for (const [w,c] of [[H*.22,'rgba(120,110,200,.10)'],[H*.12,'rgba(190,170,255,.10)'],[H*.05,'rgba(255,230,200,.10)']]){
+    const g=b.createLinearGradient(0,-w,0,w); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(.5,c); g.addColorStop(1,'rgba(0,0,0,0)');
+    b.fillStyle=g; b.fillRect(-L,-w,L*2,w*2);
+  }
+  for (let i=0;i<W*H/600;i++){
+    const x=(Math.random()*2-1)*L, y=(Math.random()+Math.random()+Math.random()-1.5)*H*.09;
+    b.globalAlpha=Math.random()*.55; b.fillStyle='#fff'; b.fillRect(x,y,DPR*.8,DPR*.8);
+  }
+  for (let i=0;i<40;i++){ // 暗塵帶
+    const x=(Math.random()*2-1)*L*.5, y=(Math.random()-.5)*H*.05, r=rnd(20,60)*DPR;
+    const g=b.createRadialGradient(x,y,0,x,y,r); g.addColorStop(0,'rgba(5,8,22,.35)'); g.addColorStop(1,'rgba(5,8,22,0)');
+    b.globalAlpha=1; b.fillStyle=g; b.beginPath(); b.arc(x,y,r,0,6.283); b.fill();
+  }
+  // 山丘與樹影
+  land=document.createElement('canvas'); land.width=W; land.height=H; const l=land.getContext('2d');
+  const hill=(base,amp,col,seed)=>{ l.fillStyle=col; l.beginPath(); l.moveTo(0,H);
+    for (let x=0;x<=W;x+=4*DPR) l.lineTo(x, H-base-amp*(Math.sin(x/W*3+seed)*.6+Math.sin(x/W*7+seed*2)*.4)); l.lineTo(W,H); l.fill(); };
+  hill(H*.10,H*.03,'#0a0f26',1); hill(H*.05,H*.025,'#050816',4);
+  l.fillStyle='#050816';
+  for (let i=0;i<14;i++){
+    const x=Math.random()*W, h=rnd(.05,.12)*H, w=h*.32, y=H-H*.05+rnd(0,H*.02);
+    l.beginPath(); l.moveTo(x,y-h);
+    for (let t=1;t<=5;t++){ const yy=y-h+h*t/5; l.lineTo(x+w*t/5*.9,yy); l.lineTo(x+w*t/5*.35,yy); }
+    l.lineTo(x-w*.35,y); l.lineTo(x-w*.9,y-h*.0);
+    for (let t=5;t>=1;t--){ const yy=y-h+h*t/5; l.lineTo(x-w*t/5*.35,yy); l.lineTo(x-w*t/5*.9,yy); }
+    l.closePath(); l.fill();
+  }
 }
 sizeSky(); addEventListener('resize', ()=>{ sizeSky(); sizeViz(); });
 
@@ -792,6 +782,7 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 function frame(ts){
   // sky
   sc.clearRect(0,0,sky.width,sky.height);
+  if (band) sc.drawImage(band,0,0);
   for (const s of stars){
     const a=.35+.65*(.5+.5*Math.sin(ts*.001*s.s+s.p));
     sc.globalAlpha=a*.85; sc.fillStyle='#fff';
@@ -808,6 +799,7 @@ function frame(ts){
     }
   }
   sc.globalAlpha=1;
+  if (land) sc.drawImage(land,0,0);
 
   // ring visualizer
   const W=viz.width, H=viz.height, cx=W/2, cy=H/2;
