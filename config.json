@@ -94,7 +94,7 @@
   "sleep_timer": {
     "enabled": true,
     "options_minutes": [15, 30, 45, 60, 90],
-    "default_minutes": 30,
+    "default_minutes": 60,
     "fade_out_seconds": 30
   },
 
